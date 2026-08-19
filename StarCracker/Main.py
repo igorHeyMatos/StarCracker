@@ -9,7 +9,7 @@ class Jogo:
         self.largura = largura
         self.altura = altura
         self.tela = pygame.display.set_mode((self.largura, self.altura))
-        pygame.display.set_caption("Space Shooter - Projeto Base")
+        pygame.display.set_caption("StarCracker")
 
         self.clock = pygame.time.Clock()
         self.fps = 10

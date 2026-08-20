@@ -4,7 +4,7 @@ from ElementoJogo import ElementoJogo
 
 
 class Asteroid(ElementoJogo):
-    def __init__(self, largura_tela, altura_tela, velocidade=5, cor=(200, 50, 50)):
+    def __init__(self, largura_tela, altura_tela, velocidade=8, cor=(81, 81, 85)):
         self.largura_tela = largura_tela
         self.altura_tela = altura_tela
         self.raio = 20
@@ -26,6 +26,9 @@ class Asteroid(ElementoJogo):
         # - Posicionar o Y acima da tela (ex: entre -150 e -50)
         # - Sortear uma velocidade de queda aleatória (ex: entre 3 e 7)
         # =========================================================================
+        self.rect.x = random.randint(0, self.largura_tela - self.rect.width)
+        self.rect.y = random.randint(-150, -50)
+        self.velocidade = random.randint(10, 50)
         pass
 
     def mover(self):

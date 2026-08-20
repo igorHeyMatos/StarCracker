@@ -2,10 +2,10 @@ import pygame
 from ElementoJogo import ElementoJogo
 
 class Nave(ElementoJogo):
-    def __init__(self, largura_tela, altura_tela, velocidade=6, cor=(0, 255, 100)):
+    def __init__(self, largura_tela, altura_tela, velocidade=10, cor=(0, 255, 100)):
         # Inicializa a classe base com posição inicial centralizada embaixo
         super().__init__(
-            x=largura_tela // 2 - 20,
+            x=largura_tela // 10 - 20,
             y=altura_tela - 60,
             largura=40,
             altura=40,
@@ -32,6 +32,14 @@ class Nave(ElementoJogo):
                 self.vel_x = 0
             elif evento.key in (pygame.K_RIGHT, pygame.K_d) and self.vel_x > 0:
                 self.vel_x = 0
+                
+        if evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_LSHIFT:
+                    self.velocidade += 20  # Aumenta a velocidade ao pressionar Shift)
+            
+        elif evento.type == pygame.KEYUP:
+            if evento.key == pygame.K_LSHIFT:
+                self.velocidade -= 20  # Restaura a velocidade ao soltar Shift
 
     def mover(self):
         """Aplica o deslocamento horizontal e trava nas bordas da tela."""
@@ -47,6 +55,8 @@ class Nave(ElementoJogo):
         # TODO 1 (Alunos): Criar um projétil (pygame.Rect) saindo da ponta da nave
         # (ex: largura 4, altura 10) e adicioná-lo à lista self.tiros
         # =========================================================================
+        tiro = pygame.Rect(self.rect.centerx - 2, self.rect.top, 4, 10)
+        self.tiros.append(tiro)
         pass
 
     def atualizar_tiros(self):
@@ -55,6 +65,10 @@ class Nave(ElementoJogo):
         # - Mover cada tiro da lista para cima (diminuir tiro.y)
         # - Remover da lista os tiros que saírem pelo topo da tela (tiro.bottom < 0)
         # =========================================================================
+        for tiro in self.tiros[:]:  # Verifica cada tiro na lista
+            tiro.y -= 20  # Move o tiro para cima (velocidade de 20 pixels por frame)
+            if tiro.bottom < 0:  # Se o tiro saiu da tela
+                self.tiros.remove(tiro)  # Remove o tiro da lista
         pass
 
     def atualizar(self):
@@ -72,4 +86,4 @@ class Nave(ElementoJogo):
 
         # Desenha os tiros ativos na cor branca
         for tiro in self.tiros:
-            pygame.draw.rect(tela, (255, 255, 255), tiro)
+            pygame.draw.rect(tela, (255, 0, 0), tiro)

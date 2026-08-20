@@ -1,3 +1,5 @@
+import random
+
 import pygame
 from Nave import Nave
 from Asteroid import Asteroid
@@ -40,6 +42,16 @@ class Jogo:
         #    - Se self.nave.rect.colliderect(self.asteroide.rect):
         #        - Finalizar a partida (self.rodando = False ou reiniciar)
         # =========================================================================
+        self.nave.atualizar_tiros()  # Atualiza a posição dos tiros antes de verificar colisões
+        for tiro in self.nave.tiros[:]:  # Itera sobre uma cópia
+            if tiro.colliderect(self.asteroide.rect):
+                self.nave.tiros.remove(tiro)  # Remove o tiro da lista
+                self.asteroide.iniciar_status()  # Reinicia o asteroide
+                self.pontos += 1  # Incrementa os pontos
+                pygame.display.set_caption(f"StarCracker - Pontos: {self.pontos}")  # Atualiza o título da janela
+                
+        if self.nave.rect.colliderect(self.asteroide.rect):
+            self.rodando = False  # Finaliza a partida
         pass
 
     def atualizar(self):

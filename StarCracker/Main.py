@@ -46,10 +46,14 @@ class Jogo:
         for i in range(self.qtd_asteroides):
             self.asteroides.append(Asteroid(self.largura, self.altura))
 
+        # Explosões ativas. Cada explosão é uma lista [x, y, raio].
+        self.explosoes = []
+
     def reiniciar(self):
         """Zera a partida para o jogador jogar de novo (botão Retry)."""
         self.pontos = 0
         self.game_over = False
+        self.explosoes = []
         self.nave = Nave(self.largura, self.altura)
         self.asteroides = []
         for i in range(self.qtd_asteroides):
@@ -82,13 +86,23 @@ class Jogo:
 
         # Verifica cada asteroide contra os tiros e contra a nave
         for asteroide in self.asteroides:
+            # Se já está explodindo, ignora colisões (não conta ponto de novo)
+            if asteroide.explodindo:
+                continue
+
             for tiro in self.nave.tiros[:]:  # Itera sobre uma cópia dos tiros
                 if tiro.colliderect(asteroide.rect):
                     self.nave.tiros.remove(tiro)  # Remove o tiro da lista
-                    asteroide.iniciar_status()  # Reinicia esse asteroide no topo
+                    asteroide.explodir()  # Começa a ficar vermelho e sumir
+                    # Cria uma explosão na posição do asteroide (x, y, raio inicial)
+                    self.explosoes.append(
+                        [asteroide.rect.centerx, asteroide.rect.centery, 5]
+                    )
                     self.pontos += 1  # Incrementa os pontos
+                    break  # Um tiro basta para destruir; sai do loop de tiros
 
-            if self.nave.rect.colliderect(asteroide.rect):
+            # Só encerra a partida se o asteroide NÃO estiver explodindo
+            if not asteroide.explodindo and self.nave.rect.colliderect(asteroide.rect):
                 self.game_over = True  # Mostra a tela de Game Over (não fecha o jogo)
 
     def atualizar(self):
@@ -114,11 +128,27 @@ class Jogo:
         texto = self.fonte.render(f"Pontos: {self.pontos}", True, (255, 255, 255))
         self.tela.blit(texto, (self.largura - texto.get_width() - 20, 20))
 
+    def desenhar_explosoes(self):
+        """Desenha e anima as explosões: círculos que crescem e depois somem."""
+        for explosao in self.explosoes[:]:  # cópia da lista para remover com segurança
+            x = explosao[0]
+            y = explosao[1]
+            raio = explosao[2]
+
+            # Dois círculos: um miolo claro e um anel externo, dando cara de explosão
+            pygame.draw.circle(self.tela, (255, 200, 0), (x, y), raio // 2)   # miolo amarelo
+            pygame.draw.circle(self.tela, (255, 90, 0), (x, y), raio, 3)      # anel laranja
+
+            explosao[2] += 4  # cresce a cada quadro (a animação)
+            if explosao[2] > 40:  # quando fica grande demais, some
+                self.explosoes.remove(explosao)
+
     def desenhar(self):
         self.desenhar_fundo()
         self.nave.desenhar(self.tela)
         for asteroide in self.asteroides:
             asteroide.desenhar(self.tela)
+        self.desenhar_explosoes()
         self.desenhar_pontuacao()
         pygame.display.flip()
 

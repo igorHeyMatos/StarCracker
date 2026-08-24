@@ -2,7 +2,7 @@ import pygame
 from ElementoJogo import ElementoJogo
 
 class Nave(ElementoJogo):
-    def __init__(self, largura_tela, altura_tela, velocidade=6, cor=(0, 255, 100)):
+    def __init__(self, largura_tela, altura_tela, velocidade=10, cor=(0, 255, 100)):
         # Inicializa a classe base com posição inicial centralizada embaixo
         super().__init__(
             x=largura_tela // 2 - 30,
@@ -129,7 +129,7 @@ class Nave(ElementoJogo):
         for tiro in self.tiros:
             cx = tiro.centerx  # centro horizontal do tiro
 
-            # 1) Rastro de partículas (fica ATRÁS do tiro, ou seja, um pouco abaixo).
+            # 1) Rastro de partículas (fica ATRÁS do tiro).
             #    Vai do mais fraco/distante ao mais forte/perto do tiro.
             pygame.draw.circle(tela, (120, 30, 0), (cx, tiro.bottom + 14), 2)
             pygame.draw.circle(tela, (200, 70, 0), (cx, tiro.bottom + 8), 3)

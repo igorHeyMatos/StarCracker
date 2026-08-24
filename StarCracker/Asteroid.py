@@ -9,6 +9,8 @@ class Asteroid(ElementoJogo):
         self.altura_tela = altura_tela
         self.raio = 20
         self.dano = 0
+        self.explodindo = False  # True enquanto toca a animação de morte (fica vermelho e some)
+        self.tempo_explosao = 0  # Contador de quadros da animação de morte
         self.dificuldade = 0  # Aumenta conforme a pontuação (deixa os asteroides mais rápidos)
 
         super().__init__(
@@ -41,19 +43,36 @@ class Asteroid(ElementoJogo):
 
         # Velocidade aleatória. A mínima é 3 para garantir que TODO asteroide se mova.
         # Fica maior conforme a dificuldade (pontuação) sobe: a cada 5 pontos ganha +1,
-        # com limite de +8 para não ficar impossível.
+        # com limite de +5 para não ficar rápido demais e dar tempo de alcançar.
         extra = self.dificuldade // 5
-        if extra > 8:
-            extra = 8
-        self.velocidade = random.randint(3, 7) + extra
+        if extra > 5:
+            extra = 5
+        self.velocidade = random.randint(3, 5) + extra
 
-        # Reinicia o dano
+        # Reinicia o dano e o estado de explosão
         self.dano = 0
+        self.explodindo = False
+        self.tempo_explosao = 0
 
-        # Cor inicial
+        # Cor inicial (cinza)
         self.cor = (100, 100, 100)
 
+    def explodir(self):
+        """Começa a animação de morte: o asteroide vai ficar vermelho e sumir."""
+        self.explodindo = True
+        self.tempo_explosao = 6  # dura 6 quadros
+
     def mover(self):
+        # Se está explodindo, faz a animação de cor (gradiente até o vermelho) e NÃO cai.
+        if self.explodindo:
+            self.tempo_explosao -= 1
+            # O verde diminui de 120 até 0 -> a cor vai de laranja para vermelho intenso
+            verde = self.tempo_explosao * 20
+            self.cor = (255, verde, 0)
+            if self.tempo_explosao <= 0:
+                self.iniciar_status()  # renasce no topo (e para de explodir)
+            return
+
         self.rect.y += self.velocidade
 
         # Reinicia no topo caso passe reto pelo fundo da tela

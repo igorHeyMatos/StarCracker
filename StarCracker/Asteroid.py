@@ -8,6 +8,7 @@ class Asteroid(ElementoJogo):
         self.largura_tela = largura_tela
         self.altura_tela = altura_tela
         self.raio = 20
+        self.dano = 0
 
         super().__init__(
             x=0,
@@ -26,10 +27,25 @@ class Asteroid(ElementoJogo):
         # - Posicionar o Y acima da tela (ex: entre -150 e -50)
         # - Sortear uma velocidade de queda aleatória (ex: entre 3 e 7)
         # =========================================================================
-        self.rect.x = random.randint(0, self.largura_tela - self.rect.width)
+    
+
+        # Posição aleatória
+        self.rect.x = random.randint(
+            0,
+            self.largura_tela - self.rect.width
+        )
+
+        # Acima da tela
         self.rect.y = random.randint(-150, -50)
-        self.velocidade = random.randint(10, 50)
-        pass
+
+        # Velocidade aleatória
+        self.velocidade = random.randint(3, 7)
+
+        # Reinicia o dano
+        self.dano = 0
+
+        # Cor inicial
+        self.cor = (100, 100, 100)
 
     def mover(self):
         self.rect.y += self.velocidade
@@ -39,5 +55,40 @@ class Asteroid(ElementoJogo):
             self.iniciar_status()
 
     def desenhar(self, tela):
-        # Polimorfismo: desenha o asteroide como círculo
-        pygame.draw.circle(tela, self.cor, self.rect.center, self.raio)
+        
+
+        x = self.rect.centerx
+        y = self.rect.centery
+
+        # Formato irregular de pedra
+        pontos = [
+            (x - 15, y - 20),
+            (x + 10, y - 18),
+            (x + 22, y - 5),
+            (x + 18, y + 15),
+            (x, y + 22),
+            (x - 20, y + 12),
+            (x - 25, y - 5)
+        ]
+
+        # Pedra
+        pygame.draw.polygon(
+            tela,
+            self.cor,
+            pontos
+        )
+
+        # Crateras / detalhes
+        pygame.draw.circle(
+            tela,
+            (60, 60, 60),
+            (x - 8, y - 5),
+            4
+        )
+
+        pygame.draw.circle(
+            tela,
+            (60, 60, 60),
+            (x + 8, y + 8),
+            3
+        )

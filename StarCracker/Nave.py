@@ -5,10 +5,10 @@ class Nave(ElementoJogo):
     def __init__(self, largura_tela, altura_tela, velocidade=10, cor=(0, 255, 100)):
         # Inicializa a classe base com posição inicial centralizada embaixo
         super().__init__(
-            x=largura_tela // 10 - 20,
-            y=altura_tela - 60,
-            largura=40,
-            altura=40,
+            x=largura_tela // 2 - 30,
+            y=altura_tela - 70,
+            largura=60,
+            altura=50,
             cor=cor,
             velocidade=velocidade
         )
@@ -76,14 +76,52 @@ class Nave(ElementoJogo):
         self.atualizar_tiros()
 
     def desenhar(self, tela):
-        # Polimorfismo: desenha a nave em formato de triângulo
-        pontos = [
-            (self.rect.centerx, self.rect.top),
-            (self.rect.left, self.rect.bottom),
-            (self.rect.right, self.rect.bottom)
-        ]
-        pygame.draw.polygon(tela, self.cor, pontos)
 
-        # Desenha os tiros ativos na cor branca
+        # Corpo principal da nave
+        pygame.draw.circle(
+            tela,
+            self.cor,
+            self.rect.center,
+            25
+        )
+
+        # Parte frontal da nave
+        frente_esquerda = [
+            (self.rect.centerx - 25, self.rect.centery - 8),
+            (self.rect.left - 10, self.rect.top),
+            (self.rect.left - 10, self.rect.centery)
+        ]
+
+        frente_direita = [
+            (self.rect.centerx + 25, self.rect.centery - 8),
+            (self.rect.right + 10, self.rect.top),
+            (self.rect.right + 10, self.rect.centery)
+        ]
+
+        pygame.draw.polygon(tela, self.cor, frente_esquerda)
+        pygame.draw.polygon(tela, self.cor, frente_direita)
+
+        # Cabine
+        pygame.draw.rect(
+            tela,
+            (100, 150, 255),
+            (
+                self.rect.right - 8,
+                self.rect.centery - 10,
+                12,
+                10
+            )
+        )
+
+        # Detalhes do corpo
+        pygame.draw.circle(
+            tela,
+            (80, 80, 80),
+            self.rect.center,
+            12,
+            2
+        )
+
+        # Desenha os tiros
         for tiro in self.tiros:
             pygame.draw.rect(tela, (255, 0, 0), tiro)

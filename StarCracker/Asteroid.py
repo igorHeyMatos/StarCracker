@@ -9,6 +9,7 @@ class Asteroid(ElementoJogo):
         self.altura_tela = altura_tela
         self.raio = 20
         self.dano = 0
+        self.dificuldade = 0  # Aumenta conforme a pontuação (deixa os asteroides mais rápidos)
 
         super().__init__(
             x=0,
@@ -38,8 +39,13 @@ class Asteroid(ElementoJogo):
         # Acima da tela
         self.rect.y = random.randint(-150, -50)
 
-        # Velocidade aleatória
-        self.velocidade = random.randint(3, 7)
+        # Velocidade aleatória. A mínima é 3 para garantir que TODO asteroide se mova.
+        # Fica maior conforme a dificuldade (pontuação) sobe: a cada 5 pontos ganha +1,
+        # com limite de +8 para não ficar impossível.
+        extra = self.dificuldade // 5
+        if extra > 8:
+            extra = 8
+        self.velocidade = random.randint(3, 7) + extra
 
         # Reinicia o dano
         self.dano = 0

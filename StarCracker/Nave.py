@@ -2,7 +2,7 @@ import pygame
 from ElementoJogo import ElementoJogo
 
 class Nave(ElementoJogo):
-    def __init__(self, largura_tela, altura_tela, velocidade=10, cor=(0, 255, 100)):
+    def __init__(self, largura_tela, altura_tela, velocidade=6, cor=(0, 255, 100)):
         # Inicializa a classe base com posição inicial centralizada embaixo
         super().__init__(
             x=largura_tela // 2 - 30,
@@ -14,36 +14,39 @@ class Nave(ElementoJogo):
         )
         self.largura_tela = largura_tela
         self.altura_tela = altura_tela
-        self.vel_x = 0
+        self.direcao = 0  # -1 = esquerda, 0 = parado, 1 = direita
+        self.turbo = False  # Shift ligado (True) ou desligado (False)
         self.tiros = []  # Lista que guardará os tiros ativos
 
     def processar_evento(self, evento):
         """Controla os eventos de teclado para movimentação e disparo."""
         if evento.type == pygame.KEYDOWN:
             if evento.key in (pygame.K_LEFT, pygame.K_a):
-                self.vel_x = -self.velocidade
+                self.direcao = -1
             elif evento.key in (pygame.K_RIGHT, pygame.K_d):
-                self.vel_x = self.velocidade
+                self.direcao = 1
             elif evento.key == pygame.K_SPACE:
                 self.atirar()
+            elif evento.key == pygame.K_LSHIFT:
+                self.turbo = True  # Liga o turbo enquanto o Shift estiver pressionado
 
         elif evento.type == pygame.KEYUP:
-            if evento.key in (pygame.K_LEFT, pygame.K_a) and self.vel_x < 0:
-                self.vel_x = 0
-            elif evento.key in (pygame.K_RIGHT, pygame.K_d) and self.vel_x > 0:
-                self.vel_x = 0
-                
-        if evento.type == pygame.KEYDOWN:
-            if evento.key == pygame.K_LSHIFT:
-                    self.velocidade += 20  # Aumenta a velocidade ao pressionar Shift)
-            
-        elif evento.type == pygame.KEYUP:
-            if evento.key == pygame.K_LSHIFT:
-                self.velocidade -= 20  # Restaura a velocidade ao soltar Shift
+            if evento.key in (pygame.K_LEFT, pygame.K_a) and self.direcao == -1:
+                self.direcao = 0
+            elif evento.key in (pygame.K_RIGHT, pygame.K_d) and self.direcao == 1:
+                self.direcao = 0
+            elif evento.key == pygame.K_LSHIFT:
+                self.turbo = False  # Desliga o turbo ao soltar o Shift
 
     def mover(self):
         """Aplica o deslocamento horizontal e trava nas bordas da tela."""
-        self.rect.x += self.vel_x
+        # A velocidade é calculada AQUI, a cada quadro. Por isso o turbo
+        # funciona na hora, mesmo se a nave já estiver se movendo.
+        velocidade_atual = self.velocidade
+        if self.turbo:
+            velocidade_atual = self.velocidade * 2  # Dobra a velocidade com o Shift
+
+        self.rect.x += self.direcao * velocidade_atual
 
         if self.rect.left < 0:
             self.rect.left = 0
@@ -55,7 +58,7 @@ class Nave(ElementoJogo):
         # TODO 1 (Alunos): Criar um projétil (pygame.Rect) saindo da ponta da nave
         # (ex: largura 4, altura 10) e adicioná-lo à lista self.tiros
         # =========================================================================
-        tiro = pygame.Rect(self.rect.centerx - 2, self.rect.top, 4, 10)
+        tiro = pygame.Rect(self.rect.centerx - 3, self.rect.top, 6, 18)
         self.tiros.append(tiro)
         pass
 
@@ -122,6 +125,22 @@ class Nave(ElementoJogo):
             2
         )
 
-        # Desenha os tiros
+        # Desenha os tiros como raios de laser com rastro de partículas
         for tiro in self.tiros:
-            pygame.draw.rect(tela, (255, 0, 0), tiro)
+            cx = tiro.centerx  # centro horizontal do tiro
+
+            # 1) Rastro de partículas (fica ATRÁS do tiro, ou seja, um pouco abaixo).
+            #    Vai do mais fraco/distante ao mais forte/perto do tiro.
+            pygame.draw.circle(tela, (120, 30, 0), (cx, tiro.bottom + 14), 2)
+            pygame.draw.circle(tela, (200, 70, 0), (cx, tiro.bottom + 8), 3)
+            pygame.draw.circle(tela, (255, 140, 0), (cx, tiro.bottom + 3), 4)
+
+            # 2) Brilho (glow) na ponta da frente do tiro
+            pygame.draw.circle(tela, (255, 90, 0), (cx, tiro.top), 7)
+
+            # 3) Corpo do raio (laranja/vermelho)
+            pygame.draw.rect(tela, (255, 70, 0), tiro)
+
+            # 4) Núcleo brilhante no centro (branco/amarelo), deixa com cara de energia
+            nucleo = pygame.Rect(cx - 1, tiro.top, 2, tiro.height)
+            pygame.draw.rect(tela, (255, 255, 200), nucleo)
